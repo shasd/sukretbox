@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <servlet>
+        <servlet-fileName>appServlet</servlet-fileName>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-fileName>contextClass</param-fileName>
+            <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-fileName>appServlet</servlet-fileName>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+
+
+    <!-- Disables Servlet Container welcome file handling. Needed for compatibility
+        with Servlet 3.0 and Tomcat 7.0 -->
+    <!--<welcome-file-list>-->
+        <!--<welcome-file></welcome-file>-->
+    <!--</welcome-file-list>-->
+
+</web-app>

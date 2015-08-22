@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>SukretBox</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div class="container">
+    <div class="row col-md-4">
+        <h2>Welcome to SukretBox</h2>
+    </div>
+    <div class="row">
+        <div class="row col-md-4" id="alert_placeholder" style="margin-top:7%"></div>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-3">
+            <input type="text" placeholder="User name" id="userName" class="form-control">
+        </div>
+        <div class="form-group col-md-3">
+            <input type="password" placeholder="Password" id="password" class="form-control">
+        </div>
+    </div>
+    <div class="row">
+        <div class="btn-group col-md-3" role="group" aria-label="...">
+            <button id="setUserButton" type="button" class="btn btn-default">Set user</button>
+            <button id="newUserButton" type="button" class="btn btn-default">Add new user</button>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <p><h3>Upload File</h3></p>
+            <form enctype="multipart/form-data" id="fileForm">
+                <p><input name="file" type="file" id="file"/></p>
+
+            </form>
+            <p>
+                <button type="button" class="btn btn-default" id="upload-button">Upload!
+                </button>
+            </p>
+
+        </div>
+        <div class="col-md-6" style="margin-top:5%">
+
+            <button type="button" class="btn btn-default" id="list-button">List files
+            </button>
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">Click a file to download.</div>
+
+                <!-- Table -->
+                <table class="table table-hover" id="filesTable">
+                     <tbody>
+                        <tr>
+                            <td>
+
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                     </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-2" style="margin-top:5%">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Message</h4>
+            </div>
+            <div class="modal-body">
+                <p>One fine body&hellip;</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
+<script src="js/sukretbox.js"></script>
+</body>
+</html>
