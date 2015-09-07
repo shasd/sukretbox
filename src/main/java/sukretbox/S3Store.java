@@ -13,6 +13,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  Stores data to Amazon S3
@@ -126,7 +128,8 @@ public class S3Store implements DataStore {
          * aws_access_key_id = YOUR_ACCESS_KEY_ID
          * aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
          */
-
+        Logger logger = LoggerFactory.getLogger(S3Store.class);
+        logger.info("s3store ");
         s3 = new AmazonS3Client();
         Region region = Region.getRegion(Regions.US_EAST_1);
         s3.setRegion(region);

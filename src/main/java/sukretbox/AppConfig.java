@@ -45,10 +45,7 @@ public class AppConfig {
     }
 
     @Bean
-    @Scope("request")
-    public MainController mainController (S3Store s3Store) {
-        MainController ret = new MainController();
-        ret.setDataStore(s3Store);
-        return ret;
+    public DataStore dataStore () {
+        return s3Store();
     }
 }
