@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,7 @@ public class MainController {
     StorageManager storageManager;
 
     @RequestMapping(value = "files/{fileName:.+}", method = RequestMethod.POST)
-    public @ResponseBody String uploadFile(@PathVariable("fileName") String fileName,
+    public @ResponseBody ResponseEntity<String> uploadFile(@PathVariable("fileName") String fileName,
                                            @RequestParam("file") MultipartFile file) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
@@ -39,20 +41,20 @@ public class MainController {
             try {
                 user = userDao.getByName(userName);
             } catch (UserDoesNotExistException e) {
-                return "Failed to add file. User does not exist.";
+                return new ResponseEntity<String>(HttpStatus.FORBIDDEN);
             }
 
             try {
                 user.increaseCurrentStorage(file.getSize());
             } catch (StorageLimitExceededException e) {
-                return "Failed to add file, storage limit would be exceeded.";
+                return new ResponseEntity<String>(HttpStatus.INSUFFICIENT_STORAGE);
             }
 
             userUpdateSuccess = userDao.update(user);
             if (userUpdateSuccess) {
                 fileAddSuccess = storageManager.storeFile(userName, fileName, file.getBytes());
                 if (fileAddSuccess) {
-                    return "successfully added file " + fileName + " for user " + userName + "\n";
+                    return new ResponseEntity<String>(HttpStatus.OK);
                 }
             }
         } catch(Exception e) {
@@ -63,7 +65,7 @@ public class MainController {
             user.decreaseCurrentStorage(file.getSize());
             userDao.update(user);
         }
-        return"failed to add file "+fileName+" for user "+userName+"\n";
+        return new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @RequestMapping(value = "files/{fileName:.+}", method = RequestMethod.GET) // :.+ needed to accept file extensions
@@ -75,7 +77,7 @@ public class MainController {
 
     @RequestMapping(value = "list", method = RequestMethod.GET)
     public @ResponseBody List<File> listFiles() {
-        // check user exists
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
         return fileDao.getByUserName(userName);
@@ -83,19 +85,19 @@ public class MainController {
 
 
     @RequestMapping(value = "register/{userName}/{password}", method = RequestMethod.POST)
-    public @ResponseBody String newUser(@PathVariable("userName") String userName,
-                                        @PathVariable("password") String password) {
+    public @ResponseBody ResponseEntity<String> newUser(@PathVariable("userName") String userName,
+                                                        @PathVariable("password") String password) {
         try {
             userDao.add(userName, password);
-            return "Successfully added user " + userName;
+            return new ResponseEntity<String>( "Successfully added user " + userName, HttpStatus.OK);
 
         } catch(UserExistsException e) {
-            return "Failed to add user " + userName + ". The user exists.";
+            return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
         } catch(Exception e) {
             e.printStackTrace();
         }
 
-        return "Failed to add user " + userName;
+        return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping(value = "username", method = RequestMethod.GET)

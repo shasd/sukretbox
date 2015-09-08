@@ -38,7 +38,7 @@ $('#newUserButton').click(function(){
         }
     window.userName = $('#userName').val();
     window.password = $('#password').val();
-
+    showalert("Registering user " + window.userName, "alert-info");
     $.ajax({
       type: "POST",
       url: window.rootURL + "register/" + window.userName+ "/" + window.password,
