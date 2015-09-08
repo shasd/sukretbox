@@ -99,7 +99,8 @@ public class S3Store implements DataStore {
             ObjectListing objectListing = s3.listObjects(
                     new ListObjectsRequest().withBucketName(BUCKET_NAME).withPrefix(userName));
             objectListing.getObjectSummaries().forEach( file ->
-                fileList.add(new File(userName, file.getKey().substring(userName.length() + 1), file.getSize())));
+                fileList.add(new File(userName, file.getKey().substring(userName.length() + 1),
+                             file.getSize(), 0, (byte)1)));
 
 
         } catch (AmazonServiceException ase) {
@@ -129,9 +130,10 @@ public class S3Store implements DataStore {
          * aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
          */
         Logger logger = LoggerFactory.getLogger(S3Store.class);
-        logger.info("s3store ");
+
         s3 = new AmazonS3Client();
         Region region = Region.getRegion(Regions.US_EAST_1);
         s3.setRegion(region);
+        logger.info("s3store initialized");
     }
 }

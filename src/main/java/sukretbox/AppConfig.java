@@ -20,7 +20,7 @@ public class AppConfig {
         driverManagerDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         driverManagerDataSource.setUrl("jdbc:mysql://sukretdb.c3mw4dj2edji.us-west-2.rds.amazonaws.com:3306/sukretbox");
         driverManagerDataSource.setUsername("sukreth");
-        driverManagerDataSource.setPassword("**");
+        driverManagerDataSource.setPassword("76476478");
         return driverManagerDataSource;
     }
 
@@ -47,5 +47,10 @@ public class AppConfig {
     @Bean
     public DataStore dataStore () {
         return s3Store();
+    }
+
+    @Bean
+    public StorageManager storageManager() {
+        return new StorageManager();
     }
 }

@@ -25,16 +25,15 @@ public class MainController {
     FileDao fileDao;
 
     @Autowired
-    DataStore dataStore;
+    StorageManager storageManager;
 
     @RequestMapping(value = "files/{fileName:.+}", method = RequestMethod.POST)
     public @ResponseBody String uploadFile(@PathVariable("fileName") String fileName,
                                            @RequestParam("file") MultipartFile file) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
-        File newFile = new File(userName, fileName, file.getSize());
         User user = null;
-        Logger logger = LoggerFactory.getLogger(MainController.class);
+
         boolean fileAddSuccess = false, dataStoreSuccess = false, userUpdateSuccess = false;
         try {
             try {
@@ -42,23 +41,18 @@ public class MainController {
             } catch (UserDoesNotExistException e) {
                 return "Failed to add file. User does not exist.";
             }
-            List<File> existingFiles = fileDao.getByUserName(userName);
-            if (existingFiles.stream().anyMatch(f -> f.getFileName().equals(fileName)))
-                return "File with same name exists";
 
             try {
-                user.increaseCurrentStorage(newFile.getSize());
+                user.increaseCurrentStorage(file.getSize());
             } catch (StorageLimitExceededException e) {
                 return "Failed to add file, storage limit would be exceeded.";
             }
 
             userUpdateSuccess = userDao.update(user);
             if (userUpdateSuccess) {
-                fileAddSuccess = fileDao.add(newFile);
+                fileAddSuccess = storageManager.storeFile(userName, fileName, file.getBytes());
                 if (fileAddSuccess) {
-                    dataStoreSuccess = dataStore.storeData(userName, fileName, file.getBytes());
-                    if (dataStoreSuccess)
-                        return "successfully added file " + fileName + " for user " + userName + "\n";
+                    return "successfully added file " + fileName + " for user " + userName + "\n";
                 }
             }
         } catch(Exception e) {
@@ -66,12 +60,9 @@ public class MainController {
         }
         // roll back updates to metadata when file can not be added to storage
         if(userUpdateSuccess) {
-            user.decreaseCurrentStorage(newFile.getSize());
+            user.decreaseCurrentStorage(file.getSize());
             userDao.update(user);
         }
-        if(fileAddSuccess)
-            fileDao.remove(newFile);
-
         return"failed to add file "+fileName+" for user "+userName+"\n";
     }
 
@@ -79,10 +70,10 @@ public class MainController {
     public @ResponseBody byte[] getFile(@PathVariable("fileName") String fileName) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
-        return dataStore.getData(userName, fileName);
+        return storageManager.getData(userName, fileName);
     }
 
-    @RequestMapping(value = "list", method = RequestMethod.GET) // :.+ needed to accept file extensions
+    @RequestMapping(value = "list", method = RequestMethod.GET)
     public @ResponseBody List<File> listFiles() {
         // check user exists
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
