@@ -20,7 +20,7 @@ public class AppConfig {
         driverManagerDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         driverManagerDataSource.setUrl("jdbc:mysql://sukretdb.c3mw4dj2edji.us-west-2.rds.amazonaws.com:3306/sukretbox");
         driverManagerDataSource.setUsername("sukreth");
-        driverManagerDataSource.setPassword("76476478");
+        driverManagerDataSource.setPassword("******");
         return driverManagerDataSource;
     }
 
