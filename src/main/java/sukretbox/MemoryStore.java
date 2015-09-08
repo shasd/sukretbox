@@ -39,5 +39,6 @@ public class MemoryStore implements DataStore {
     public List<File> listFiles(String userName){
         return null;
     }
-    
+    public boolean deleteData(String userName, String fileName){ return false; }
+    public boolean copyFile(String userName, String fileName, String newUserName, String newFileName) { return false; }
 }

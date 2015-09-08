@@ -1,9 +1,6 @@
 package sukretbox;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -72,7 +69,7 @@ public class MainController {
     public @ResponseBody byte[] getFile(@PathVariable("fileName") String fileName) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
-        return storageManager.getData(userName, fileName);
+        return storageManager.getFile(userName, fileName);
     }
 
     @RequestMapping(value = "list", method = RequestMethod.GET)
@@ -84,7 +81,7 @@ public class MainController {
     }
 
 
-    @RequestMapping(value = "register/{userName}/{password}", method = RequestMethod.POST)
+    @RequestMapping(value = "register/{userName}/{password}", method = RequestMethod.PUT)
     public @ResponseBody ResponseEntity<String> newUser(@PathVariable("userName") String userName,
                                                         @PathVariable("password") String password) {
         try {
@@ -103,6 +100,17 @@ public class MainController {
     @RequestMapping(value = "username", method = RequestMethod.GET)
     public @ResponseBody String getUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    // just to test file deletion, should be RequestMethod.DELETE
+    @RequestMapping(value = "deleteFile/{fileName:.+}", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity<String> deleteFile(@PathVariable("fileName") String fileName) throws Exception {
+        File file = fileDao.get(SecurityContextHolder.getContext().getAuthentication().getName(), fileName);
+        storageManager.deleteFile(file.getUserName(), file.getFileName());
+        User user = userDao.getByName(file.getUserName());
+        user.decreaseCurrentStorage(file.getSize());
+        userDao.update(user);
+        return new ResponseEntity<String>(HttpStatus.OK);
     }
 
 }

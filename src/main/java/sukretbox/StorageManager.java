@@ -1,11 +1,15 @@
 package sukretbox;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by sukret on 9/7/15.
+ * Manages metadata in fileDao and actual storage together
  */
 public class StorageManager {
 
@@ -34,10 +38,39 @@ public class StorageManager {
         return false;
     }
 
-    public byte[] getData(String userName, String fileName) {
+    public byte[] getFile(String userName, String fileName) {
         File file = fileDao.getStoredFile(userName, fileName);
         if(file == null)
             return null;
         return dataStore.getData(file.getUserName(), file.getFileName());
+    }
+
+    public boolean deleteFile(String userName, String fileName) {
+        Logger logger = LoggerFactory.getLogger(StorageManager.class);
+        File file = fileDao.get(userName, fileName);
+        if(file == null)
+            return false;
+        // if this reference does not store the file we can delete the reference
+        if(file.getStored() == (byte) 0)
+            return fileDao.remove(file);
+        // if this reference stores the file we need to check if there are other references for this file
+        List<File> references = fileDao.getReferences(file.getHash());
+        if(references.size() == 1) { // if this is the only reference
+            if(dataStore.deleteData(userName, fileName))
+                return fileDao.remove(file);
+        }
+        // move stored file to another reference
+        File anotherReference = references.stream()
+                                          .filter(f -> !f.getFileName().equals(fileName) ||
+                                                       !f.getUserName().equals(userName))
+                                          .collect(Collectors.toList())
+                                          .get(0);
+        if(!dataStore.copyFile(userName, fileName, anotherReference.getUserName(), anotherReference.getFileName()))
+            return false;
+        anotherReference.setStored((byte) 1);
+        fileDao.update(anotherReference);
+        fileDao.remove(file);
+        return dataStore.deleteData(userName, fileName);
+
     }
 }

@@ -40,7 +40,7 @@ $('#newUserButton').click(function(){
     window.password = $('#password').val();
     showalert("Registering user " + window.userName, "alert-info");
     $.ajax({
-      type: "POST",
+      type: "PUT",
       url: window.rootURL + "register/" + window.userName+ "/" + window.password,
 
       success: function(){

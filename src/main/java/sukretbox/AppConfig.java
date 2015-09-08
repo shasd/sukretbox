@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
+import java.io.FileInputStream;
+import java.util.Scanner;
 
 /**
  * Created by sukret on 9/7/15.
@@ -15,12 +17,14 @@ import javax.sql.DataSource;
 public class AppConfig {
 
     @Bean
-    public DriverManagerDataSource dataSource() {
+    public DriverManagerDataSource dataSource() throws Exception {
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
         driverManagerDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         driverManagerDataSource.setUrl("jdbc:mysql://sukretdb.c3mw4dj2edji.us-west-2.rds.amazonaws.com:3306/sukretbox");
         driverManagerDataSource.setUsername("sukreth");
-        driverManagerDataSource.setPassword("******");
+        Scanner sc = new Scanner(new FileInputStream(new java.io.File("credentials")));
+        sc.next(); sc.next();
+        driverManagerDataSource.setPassword(sc.next());
         return driverManagerDataSource;
     }
 
