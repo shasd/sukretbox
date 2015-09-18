@@ -23,7 +23,8 @@ public class UserDao {
                 (rs, rowNum) -> new User(rs.getString("name"),
                                          rs.getInt("current_storage"),
                                          rs.getInt("storage_limit"),
-                                         rs.getString("password"))
+                                         rs.getString("password"),
+                                         rs.getString("dbx_token"))
         );
         if(users.size() == 0)
             throw new UserDoesNotExistException();
@@ -33,8 +34,9 @@ public class UserDao {
     public boolean add(String name, String password) throws UserExistsException {
         if(jdbcTemplate.queryForList("SELECT * FROM users WHERE name = ?", new Object[]{name}).size() != 0 )
             throw new UserExistsException();
-        int numAffected = jdbcTemplate.update("INSERT INTO users VALUES(?,?,?,?)" ,
-                                              new Object[]{name, "0", Long.toString(DEFAULT_STORAGE_LIMIT), password});
+        int numAffected = jdbcTemplate.update("INSERT INTO users VALUES(?,?,?,?,?)" ,
+                                              new Object[]{name, "0", Long.toString(DEFAULT_STORAGE_LIMIT), password,
+                                                           "none"});
         if(numAffected == 1)
             return true;
         else
@@ -42,9 +44,10 @@ public class UserDao {
     }
 
     public boolean update(User user) {
-        int numAffected = jdbcTemplate.update("UPDATE users SET storage_limit=?, current_storage=? WHERE name=?",
+        int numAffected = jdbcTemplate.update("UPDATE users SET storage_limit=?, current_storage=?, dbx_token=? WHERE name=?",
                             new Object[]{Long.toString(user.getStorageLimit()),
                                          Long.toString(user.getCurrentStorage()),
+                                         user.getDbxToken(),
                                          user.getName() });
         if(numAffected == 1)
             return true;

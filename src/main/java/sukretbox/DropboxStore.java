@@ -1,7 +1,13 @@
 package sukretbox;
 
+import com.dropbox.core.DbxAppInfo;
+import com.dropbox.core.DbxClient;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.DbxWebAuthNoRedirect;
+
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 /**
@@ -9,14 +15,14 @@ import java.util.Scanner;
  */
 public class DropboxStore implements DataStore {
 
-    private String appKey, appSecret;
+    private DbxClient dbxClient;
 
-    public DropboxStore() throws Exception {
-        // read credentials from file, should be created for each deployment
-        Scanner sc = new Scanner(new FileInputStream(new java.io.File("credentials")));
-        appKey = sc.next();
-        appSecret = sc.next();
+    public DropboxStore(String accessToken)  {
+        DbxRequestConfig config = new DbxRequestConfig("SukretBox", Locale.getDefault().toString());
+        dbxClient = new DbxClient(config, accessToken);
     }
+
+
 
     @Override
     public byte[] getData(String userName, String fileName) {
@@ -26,11 +32,6 @@ public class DropboxStore implements DataStore {
     @Override
     public boolean storeData(String userName, String fileName, byte[] data) {
         return false;
-    }
-
-    @Override
-    public List<File> listFiles(String userName) {
-        return null;
     }
 
     @Override
