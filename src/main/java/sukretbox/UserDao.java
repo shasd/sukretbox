@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class UserDao {
 
-    private static final long DEFAULT_STORAGE_LIMIT = 100000000;
+    private static final long DEFAULT_STORAGE_LIMIT = 100000000; // 100 MB per new user by default
 
     @Autowired
     JdbcTemplate jdbcTemplate;

@@ -30,6 +30,7 @@ public class MainController {
     @Autowired
     StorageManager storageManager;
 
+    // upload a file
     @RequestMapping(value = "files/{fileName:.+}", method = RequestMethod.POST)
     public @ResponseBody ResponseEntity<String> uploadFile(@PathVariable("fileName") String fileName,
                                            @RequestParam("file") MultipartFile file) {
@@ -68,14 +69,14 @@ public class MainController {
         }
         return new ResponseEntity<String>(HttpStatus.METHOD_NOT_ALLOWED);
     }
-
+    // download a file
     @RequestMapping(value = "files/{fileName:.+}", method = RequestMethod.GET) // :.+ needed to accept file extensions
     public @ResponseBody byte[] getFile(@PathVariable("fileName") String fileName) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
         return storageManager.getFile(userName, fileName);
     }
-
+    // list files
     @RequestMapping(value = "list", method = RequestMethod.GET)
     public @ResponseBody List<File> listFiles() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -83,7 +84,7 @@ public class MainController {
         return fileDao.getByUserName(userName);
     }
 
-
+    // register new user
     @RequestMapping(value = "register/{userName}/{password}", method = RequestMethod.PUT)
     public @ResponseBody ResponseEntity<String> newUser(@PathVariable("userName") String userName,
                                                         @PathVariable("password") String password) {
@@ -99,7 +100,7 @@ public class MainController {
 
         return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
     }
-
+    // get name of logged in user
     @RequestMapping(value = "username", method = RequestMethod.GET)
     public @ResponseBody String getUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();

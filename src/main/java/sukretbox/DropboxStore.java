@@ -12,6 +12,7 @@ import java.util.Scanner;
 
 /**
  * Created by sukret on 9/8/15.
+ * For storing files on DropBox account of user
  */
 public class DropboxStore implements DataStore {
 

@@ -20,8 +20,6 @@ public class User {
         this.password = password;
     }
 
-
-
     public User(String name, long currentStorage, long storageLimit) {
         this.name = name;
         this.currentStorage = currentStorage;

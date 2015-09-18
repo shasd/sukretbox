@@ -87,13 +87,13 @@ public class FileDao {
             return null;
         return files.get(0);
     }
-
+    // return all users who have this file
     public List<File> getReferences(long hash) {
         return jdbcTemplate.query("SELECT * FROM files WHERE hash=?",
                                   new Object[] { Long.toString(hash) },
                                   FileDao::mapRow);
     }
-
+    // return if this hash is already stored
     public boolean fileStored(long hash) {
         List<File> files = jdbcTemplate.query("SELECT * FROM files WHERE hash=? and stored=1",
                                               new Object[] { Long.toString(hash) },
