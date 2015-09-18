@@ -10,7 +10,6 @@ public class User {
     private long currentStorage;
     private long storageLimit;
     private String password;
-    private String dbxToken;
 
     public String getPassword() {
         return password;
@@ -27,20 +26,11 @@ public class User {
         this.currentStorage = currentStorage;
         this.storageLimit = storageLimit;
     }
-    public User(String name, long currentStorage, long storageLimit, String password, String dbxToken) {
+    public User(String name, long currentStorage, long storageLimit, String password) {
         this.name = name;
         this.currentStorage = currentStorage;
         this.storageLimit = storageLimit;
         this.password = password;
-        this.dbxToken = dbxToken;
-    }
-
-    public String getDbxToken() {
-        return dbxToken;
-    }
-
-    public void setDbxToken(String dbxToken) {
-        this.dbxToken = dbxToken;
     }
 
     public String getName() {

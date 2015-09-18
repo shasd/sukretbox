@@ -1,7 +1,5 @@
 package sukretbox;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sukretbox.exceptions.StorageLimitExceededException;
 import sukretbox.exceptions.UserDoesNotExistException;
 import sukretbox.exceptions.UserExistsException;
-import sun.applet.Main;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -78,6 +74,7 @@ public class MainController {
 
     @RequestMapping(value = "list", method = RequestMethod.GET)
     public @ResponseBody List<File> listFiles() {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
         return fileDao.getByUserName(userName);
