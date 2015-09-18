@@ -2,6 +2,8 @@ package sukretbox;
 
 import java.util.List;
 
+// interface for data storage technologies: memory, dropbox, S3 etc.
+
 public interface DataStore {
 
     byte[] getData(String userName, String fileName);
