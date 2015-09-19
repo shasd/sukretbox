@@ -71,10 +71,10 @@ public class MainController {
     }
     // download a file
     @RequestMapping(value = "files/{fileName:.+}", method = RequestMethod.GET) // :.+ needed to accept file extensions
-    public @ResponseBody byte[] getFile(@PathVariable("fileName") String fileName) {
+    public @ResponseBody byte[] getFile(@PathVariable("fileName") String fileName) throws UserDoesNotExistException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userName = auth.getName();
-        return storageManager.getFile(userName, fileName);
+        return storageManager.getFile(userName, fileName, userDao.getByName(userName).getDbxToken());
     }
     // list files
     @RequestMapping(value = "list", method = RequestMethod.GET)

@@ -42,7 +42,7 @@ public class UserDao {
             throw new UserExistsException();
         int numAffected = jdbcTemplate.update("INSERT INTO " + usersTable + " VALUES(?,?,?,?,?)" ,
                                               new Object[]{name, "0", Long.toString(DEFAULT_STORAGE_LIMIT), password,
-                                                           "none"});
+                                                           "NONE"});
         if(numAffected == 1)
             return true;
         else

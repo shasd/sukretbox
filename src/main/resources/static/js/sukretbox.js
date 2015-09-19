@@ -105,9 +105,9 @@ $(document).ready(function(){
 
     $.get("dropboxAuth", function(data, status){
         if(data !== "already authorized") {
-            $('#dbx').html("<a href=\"" + data + "\"><h5>Connect your Dropbox account</h5></a>");
+            $('#dbx').html("<a href=\"" + data + "\"><h5>Link your Dropbox account to save space.</h5></a>");
         } else
-            $('#dbx').html("<h5>Your Dropbox account is connected.</h5>");
+            $('#dbx').html("<h5>Your Dropbox account is linked.</h5>");
     });
 });
 

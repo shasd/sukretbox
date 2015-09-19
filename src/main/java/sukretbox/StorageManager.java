@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 
 /**
  * Created by sukret on 9/7/15.
- * Manages metadata in fileDao and actual storage together
+ * Manages metadata in fileDao and actual defaultStorage together
  */
 public class StorageManager {
 
-    private static final File.Storage storage = File.Storage.SUKRETBOX;
+    private static final File.Storage defaultStorage = File.Storage.SUKRETBOX;
 
     @Autowired
     DataStore dataStore;
@@ -28,7 +28,7 @@ public class StorageManager {
             return false;
         long hash = JenkinsHash.hash64(data);
         boolean alreadyStored = fileDao.fileStored(hash); // check if same file exists for another user
-        File.Storage newStorage = alreadyStored ? File.Storage.NONE : storage;
+        File.Storage newStorage = alreadyStored ? File.Storage.NONE : defaultStorage;
         File file = new File(userName, fileName, data.length, hash, newStorage);
         if(!fileDao.add(file))
             return false;
@@ -41,10 +41,15 @@ public class StorageManager {
         return false;
     }
 
-    public byte[] getFile(String userName, String fileName) {
+    public byte[] getFile(String userName, String fileName, String dbxAccessToken) {
         File file = fileDao.getStoredFile(userName, fileName);
         if(file == null)
             return null;
+        if(file.getStorage() == File.Storage.DROPBOX) {
+            if(dbxAccessToken == null)
+                return null;
+            return DropboxStore.getData(userName, fileName, dbxAccessToken);
+        }
         return dataStore.getData(file.getUserName(), file.getFileName());
     }
 
@@ -70,10 +75,24 @@ public class StorageManager {
                                           .get(0);
         if(!dataStore.copyFile(userName, fileName, anotherReference.getUserName(), anotherReference.getFileName()))
             return false;
-        anotherReference.setStorage(storage);
+        anotherReference.setStorage(defaultStorage);
         fileDao.update(anotherReference);
         fileDao.remove(file);
         return dataStore.deleteData(userName, fileName);
 
+    }
+
+    public void mergeDropbox(String userName, String accessToken) {
+        List<File> dbxFiles = DropboxStore.listFilesWithHashes(userName, accessToken);
+        dbxFiles.stream().forEach(f -> {
+            if(fileDao.fileStored(f.getHash())){
+                DropboxStore.deleteData(userName, f.getFileName(), accessToken);
+                f.setStorage(File.Storage.NONE);
+                fileDao.add(f);
+            } else {
+                f.setStorage(File.Storage.DROPBOX);
+                fileDao.add(f);
+            }
+        });
     }
 }

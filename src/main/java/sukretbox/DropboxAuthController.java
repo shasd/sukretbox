@@ -29,12 +29,16 @@ public class DropboxAuthController {
     @Autowired
     UserDao userDao;
 
+    @Autowired
+    StorageManager storageManager;
+
+    // returns URI for dropbox linking authorization on dropbox website
     @RequestMapping(value = "dropboxAuth", method = RequestMethod.GET)
     public @ResponseBody String getAuthorizeUrl(HttpServletRequest request) throws Exception {
-        // check if already connected to dropbox
+        // check if already linked to dropbox
         if(!userDao.getByName(SecurityContextHolder.getContext().getAuthentication().getName())
                    .getDbxToken()
-                   .equals("none"))
+                   .equals("NONE"))
             return "already authorized";
         // read credentials from file, should be created for each deployment
         Scanner sc = new Scanner(new FileInputStream(new java.io.File("credentials")));
@@ -50,6 +54,7 @@ public class DropboxAuthController {
         return webAuth.start();
     }
 
+    // dropbox posts the authentication code here after the user allows linking
     @RequestMapping(value = "dropboxAuthCode")
     public RedirectView postCode(HttpServletRequest request) throws Exception {
         DbxAuthFinish authFinish;
@@ -63,7 +68,7 @@ public class DropboxAuthController {
         User user = userDao.getByName(SecurityContextHolder.getContext().getAuthentication().getName());
         user.setDbxToken(accessToken);
         userDao.update(user);
-
+        storageManager.mergeDropbox(user.getName(), accessToken);
         return new RedirectView("index?dbxsuccess");
     }
 }

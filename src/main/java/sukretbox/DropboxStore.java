@@ -14,16 +14,12 @@ import java.util.stream.Collectors;
  * Created by sukret on 9/8/15.
  * For storing files on DropBox account of user
  */
-public class DropboxStore implements DataStore {
+public class DropboxStore {
 
-    private DbxClient dbxClient;
-
-    public DropboxStore(String accessToken)  {
+    // return list of files and their hashes
+    public static List<File> listFilesWithHashes(String userName, String accessToken) {
         DbxRequestConfig config = new DbxRequestConfig("SukretBox", Locale.getDefault().toString());
-        dbxClient = new DbxClient(config, accessToken);
-    }
-
-    public List<File> listFilesWithHashes(String userName) {
+        DbxClient dbxClient = new DbxClient(config, accessToken);
         DbxEntry.WithChildren listing;
         try {
             listing = dbxClient.getMetadataWithChildren("/");
@@ -49,22 +45,64 @@ public class DropboxStore implements DataStore {
         }).collect(Collectors.toList());
     }
 
-    @Override
-    public byte[] getData(String userName, String fileName) {
-        return new byte[0];
+    public static byte[] getData(String userName, String fileName, String accessToken) {
+        DbxRequestConfig config = new DbxRequestConfig("SukretBox", Locale.getDefault().toString());
+        DbxClient dbxClient = new DbxClient(config, accessToken);
+        DbxEntry.WithChildren listing;
+        try {
+            listing = dbxClient.getMetadataWithChildren("/");
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        List<DbxEntry.File> files = listing.children.stream()
+                                                    .filter(c -> c.isFile())
+                                                    .map(c -> c.asFile())
+                                                    .filter(c -> c.name.equals(fileName))
+                                                    .collect(Collectors.toList());
+        if(files.size() == 0)
+            return null;
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            dbxClient.getFile(files.get(0).path, null, os);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        byte[] data = os.toByteArray();
+        return data;
     }
 
-    @Override
-    public boolean storeData(String userName, String fileName, byte[] data) {
+    public static boolean storeData(String userName, String fileName, byte[] data) {
         return false;
     }
 
-    @Override
-    public boolean deleteData(String userName, String fileName) {
-        return false;
+
+    public static boolean deleteData(String userName, String fileName, String accessToken) {
+        DbxRequestConfig config = new DbxRequestConfig("SukretBox", Locale.getDefault().toString());
+        DbxClient dbxClient = new DbxClient(config, accessToken);
+        DbxEntry.WithChildren listing;
+        try {
+            listing = dbxClient.getMetadataWithChildren("/");
+        } catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return listing.children.stream().filter(c -> c.isFile()).map(c -> c.asFile()).anyMatch(f -> {
+            if(f.name.equals(fileName)) {
+                try {
+                    dbxClient.delete(f.path);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        });
     }
 
-    @Override
     public boolean copyFile(String userName, String fileName, String newUserName, String newFileName) {
         return false;
     }
