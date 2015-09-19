@@ -10,4 +10,5 @@ public interface DataStore {
     boolean storeData(String userName, String fileName, byte[] data);
     public boolean deleteData(String userName, String fileName);
     public boolean copyFile(String userName, String fileName, String newUserName, String newFileName);
+    //public List<File> listFiles(String userName);
 }

@@ -80,6 +80,8 @@ $('#upload-button').click(function(){
 
 });
 
+
+
 var showalert = function(message, alertType) {
     $('#alert_placeholder div').remove();
     $('#alert_placeholder').append('<div id="alertdiv" class="alert ' +  alertType + '">'+message+'</div>')
@@ -97,6 +99,16 @@ $(document).ready(function(){
             listFiles(true);
         });
     }
+    setTimeout(function() {
+        $(".dbxalert").remove();
+    }, 3000);
+
+    $.get("dropboxAuth", function(data, status){
+        if(data !== "already authorized") {
+            $('#dbx').html("<a href=\"" + data + "\"><h5>Connect your Dropbox account</h5></a>");
+        } else
+            $('#dbx').html("<h5>Your Dropbox account is connected.</h5>");
+    });
 });
 
 

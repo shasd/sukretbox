@@ -10,15 +10,15 @@ public class File {
     private String fileName;
     private long size;
     private long hash;
-    private byte stored; // 1 if this file is actually stored under this users name
+    private Storage storage;
 
-    public File(String userName, String fileName, long size, long hash, byte stored) {
+    public File(String userName, String fileName, long size, long hash, Storage storage) {
 
         this.userName = userName;
         this.fileName = fileName;
         this.size = size;
         this.hash = hash;
-        this.stored = stored;
+        this.storage = storage;
     }
 
     public File() {
@@ -58,13 +58,38 @@ public class File {
         this.hash = hash;
     }
 
-    public byte getStored() {
-        return stored;
+    public Storage getStorage() {
+        return storage;
     }
 
-    public void setStored(byte stored) {
-        this.stored = stored;
+    public void setStorage(Storage storage) {
+        this.storage = storage;
     }
 
+
+    public enum Storage {
+        NONE,
+        SUKRETBOX,
+        DROPBOX;
+
+        @Override
+        public String toString() {
+            if(this == NONE)
+                return "NONE";
+            if(this == SUKRETBOX)
+                return "SUKRETBOX";
+            if(this == DROPBOX)
+                return "DROPBOX";
+            return "NONE";
+        }
+
+        public static Storage map(String val) {
+            if(val.equals("SUKRETBOX"))
+                return Storage.SUKRETBOX;
+            if(val.equals("DROPBOX"))
+                return Storage.DROPBOX;
+            return Storage.NONE;
+        }
+    }
 
 }

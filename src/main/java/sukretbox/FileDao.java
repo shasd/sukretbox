@@ -13,6 +13,8 @@ import java.util.List;
  */
 public class FileDao {
 
+    private static final String filesTable = "files2";
+
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -21,16 +23,16 @@ public class FileDao {
                         rs.getString("file_name"),
                         rs.getLong("size"),
                         rs.getLong("hash"),
-                        rs.getByte("stored"));
+                        File.Storage.map(rs.getString("storage")));
     }
 
     public List<File> getByUserName(String userName) {
          return jdbcTemplate.query(
-                "SELECT * FROM files WHERE user_name = ?", new Object[] { userName }, FileDao::mapRow);
+                "SELECT * FROM " + filesTable + " WHERE user_name = ?", new Object[] { userName }, FileDao::mapRow);
     }
 
     public File get(String userName, String fileName) {
-        List<File> files = jdbcTemplate.query("SELECT * FROM files WHERE user_name=? and file_name=?",
+        List<File> files = jdbcTemplate.query("SELECT * FROM " + filesTable + " WHERE user_name=? and file_name=?",
                                               new Object[] { userName, fileName },
                                               FileDao::mapRow);
         if(files.size() == 0)
@@ -39,9 +41,9 @@ public class FileDao {
     }
 
     public boolean add(File file) {
-        int numAffected = jdbcTemplate.update("INSERT INTO files VALUES(?,?,?,?,?)",
+        int numAffected = jdbcTemplate.update("INSERT INTO " + filesTable + " VALUES(?,?,?,?,?)",
                 new Object[]{file.getFileName(), file.getUserName(), Long.toString(file.getSize()),
-                        Long.toString(file.getHash()), Byte.toString(file.getStored())});
+                        Long.toString(file.getHash()), file.getStorage().toString()});
         if(numAffected == 1)
             return true;
         else
@@ -49,7 +51,7 @@ public class FileDao {
     }
 
     public boolean remove(File file) {
-        int numAffected = jdbcTemplate.update("DELETE FROM files WHERE user_name=? and file_name=?" ,
+        int numAffected = jdbcTemplate.update("DELETE FROM " + filesTable + " WHERE user_name=? and file_name=?" ,
                                               new Object[]{file.getUserName(), file.getFileName()});
         if(numAffected == 1)
             return true;
@@ -58,10 +60,11 @@ public class FileDao {
     }
 
     public boolean update(File file) {
-        int numAffected = jdbcTemplate.update("UPDATE files SET size=?, hash=?, stored=? WHERE file_name=? and user_name=?",
+        int numAffected = jdbcTemplate.update("UPDATE " + filesTable +
+                                              " SET size=?, hash=?, storage=? WHERE file_name=? and user_name=?",
                                               new Object[]{Long.toString(file.getSize()),
                                                            Long.toString(file.getHash()),
-                                                           Byte.toString(file.getStored()),
+                                                           file.getStorage().toString(),
                                                            file.getFileName(),
                                                            file.getUserName()});
         if(numAffected == 1)
@@ -73,14 +76,14 @@ public class FileDao {
     // return the same userName and fileName if file is stored under these names, otherwise the userName and fileName
     // which have the file stored
     public File getStoredFile(String userName, String fileName) {
-        List<File> file = jdbcTemplate.query("SELECT * FROM files WHERE user_name=? and file_name=?",
+        List<File> file = jdbcTemplate.query("SELECT * FROM " + filesTable + " WHERE user_name=? and file_name=?",
                                              new Object[] { userName, fileName },
                                              FileDao::mapRow);
         if(file.size() != 1)
             return null;
-        if(file.get(0).getStored() == (byte)1)
+        if(file.get(0).getStorage() != File.Storage.NONE)
             return file.get(0);
-        List<File> files = jdbcTemplate.query("SELECT * FROM files WHERE hash=? and stored=1",
+        List<File> files = jdbcTemplate.query("SELECT * FROM " + filesTable + " WHERE hash=? and storage<>'NONE'",
                 new Object[]{Long.toString(file.get(0).getHash())},
                 FileDao::mapRow);
         if(files.size() == 0)
@@ -89,13 +92,13 @@ public class FileDao {
     }
     // return all users who have this file
     public List<File> getReferences(long hash) {
-        return jdbcTemplate.query("SELECT * FROM files WHERE hash=?",
+        return jdbcTemplate.query("SELECT * FROM " + filesTable + " WHERE hash=?",
                                   new Object[] { Long.toString(hash) },
                                   FileDao::mapRow);
     }
     // return if this hash is already stored
     public boolean fileStored(long hash) {
-        List<File> files = jdbcTemplate.query("SELECT * FROM files WHERE hash=? and stored=1",
+        List<File> files = jdbcTemplate.query("SELECT * FROM " + filesTable + " WHERE hash=? and storage<>'NONE'",
                                               new Object[] { Long.toString(hash) },
                                               FileDao::mapRow);
         if(files.size() > 0)

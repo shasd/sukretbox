@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
  */
 public class StorageManager {
 
+    private static final File.Storage storage = File.Storage.SUKRETBOX;
+
     @Autowired
     DataStore dataStore;
 
@@ -26,7 +28,8 @@ public class StorageManager {
             return false;
         long hash = JenkinsHash.hash64(data);
         boolean alreadyStored = fileDao.fileStored(hash); // check if same file exists for another user
-        File file = new File(userName, fileName, data.length, hash, alreadyStored ? (byte) 0 : (byte) 1);
+        File.Storage newStorage = alreadyStored ? File.Storage.NONE : storage;
+        File file = new File(userName, fileName, data.length, hash, newStorage);
         if(!fileDao.add(file))
             return false;
         if(alreadyStored)
@@ -51,7 +54,7 @@ public class StorageManager {
         if(file == null)
             return false;
         // if this reference does not store the file we can delete the reference
-        if(file.getStored() == (byte) 0)
+        if(file.getStorage() == File.Storage.NONE)
             return fileDao.remove(file);
         // if this reference stores the file we need to check if there are other references for this file
         List<File> references = fileDao.getReferences(file.getHash());
@@ -67,7 +70,7 @@ public class StorageManager {
                                           .get(0);
         if(!dataStore.copyFile(userName, fileName, anotherReference.getUserName(), anotherReference.getFileName()))
             return false;
-        anotherReference.setStored((byte) 1);
+        anotherReference.setStorage(storage);
         fileDao.update(anotherReference);
         fileDao.remove(file);
         return dataStore.deleteData(userName, fileName);

@@ -100,7 +100,7 @@ public class S3Store implements DataStore {
                     new ListObjectsRequest().withBucketName(BUCKET_NAME).withPrefix(userName));
             objectListing.getObjectSummaries().forEach(file ->
                     fileList.add(new File(userName, file.getKey().substring(userName.length() + 1),
-                            file.getSize(), 0, (byte) 1)));
+                            file.getSize(), 0, File.Storage.SUKRETBOX)));
 
 
         } catch (AmazonServiceException ase) {

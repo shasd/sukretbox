@@ -1,14 +1,14 @@
 package sukretbox;
 
-import com.dropbox.core.DbxAppInfo;
-import com.dropbox.core.DbxClient;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.DbxWebAuthNoRedirect;
+import com.dropbox.core.*;
+import com.dropbox.core.json.JsonReader;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Created by sukret on 9/8/15.
@@ -23,7 +23,31 @@ public class DropboxStore implements DataStore {
         dbxClient = new DbxClient(config, accessToken);
     }
 
+    public List<File> listFilesWithHashes(String userName) {
+        DbxEntry.WithChildren listing;
+        try {
+            listing = dbxClient.getMetadataWithChildren("/");
+        } catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
 
+        return listing.children.stream().filter(c -> c.isFile()).map(c -> {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try {
+                dbxClient.getFile(c.path, null, os);
+            } catch(Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+            byte[] data = os.toByteArray();
+            return new File(userName,
+                    c.asFile().name,
+                    c.asFile().numBytes,
+                    JenkinsHash.hash64(data),
+                    File.Storage.DROPBOX);
+        }).collect(Collectors.toList());
+    }
 
     @Override
     public byte[] getData(String userName, String fileName) {

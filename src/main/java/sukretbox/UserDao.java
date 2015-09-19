@@ -14,12 +14,18 @@ public class UserDao {
 
     private static final long DEFAULT_STORAGE_LIMIT = 100000000; // 100 MB per new user by default
 
+    private static final String usersTable = "users2"; // name of the table storing user information
+
+    public static String getUsersTable() {
+        return usersTable;
+    }
+
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     public User getByName(String name) throws UserDoesNotExistException {
         List<User> users = jdbcTemplate.query(
-                "SELECT * FROM users WHERE name = ?", new Object[] { name },
+                "SELECT * FROM " + usersTable + " WHERE name = ?", new Object[] { name },
                 (rs, rowNum) -> new User(rs.getString("name"),
                                          rs.getInt("current_storage"),
                                          rs.getInt("storage_limit"),
@@ -32,9 +38,9 @@ public class UserDao {
     }
 
     public boolean add(String name, String password) throws UserExistsException {
-        if(jdbcTemplate.queryForList("SELECT * FROM users WHERE name = ?", new Object[]{name}).size() != 0 )
+        if(jdbcTemplate.queryForList("SELECT * FROM " + usersTable + " WHERE name = ?", new Object[]{name}).size() != 0)
             throw new UserExistsException();
-        int numAffected = jdbcTemplate.update("INSERT INTO users VALUES(?,?,?,?,?)" ,
+        int numAffected = jdbcTemplate.update("INSERT INTO " + usersTable + " VALUES(?,?,?,?,?)" ,
                                               new Object[]{name, "0", Long.toString(DEFAULT_STORAGE_LIMIT), password,
                                                            "none"});
         if(numAffected == 1)
@@ -44,7 +50,8 @@ public class UserDao {
     }
 
     public boolean update(User user) {
-        int numAffected = jdbcTemplate.update("UPDATE users SET storage_limit=?, current_storage=?, dbx_token=? WHERE name=?",
+        int numAffected = jdbcTemplate.update("UPDATE " + usersTable +
+                                              " SET storage_limit=?, current_storage=?, dbx_token=? WHERE name=?",
                             new Object[]{Long.toString(user.getStorageLimit()),
                                          Long.toString(user.getCurrentStorage()),
                                          user.getDbxToken(),
