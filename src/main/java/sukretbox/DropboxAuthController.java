@@ -46,7 +46,7 @@ public class DropboxAuthController {
         String appSecret = sc.next();
         DbxAppInfo appInfo = new DbxAppInfo(appKey, appSecret);
         DbxRequestConfig config = new DbxRequestConfig("SukretBox", Locale.getDefault().toString());
-        String redirectUri = "http://" + request.getLocalName() + ":" + request.getServerPort() + "/" + "dropboxAuthCode";
+        String redirectUri = "https://" + request.getLocalName() + ":" + request.getServerPort() + "/" + "dropboxAuthCode";
         HttpSession session = request.getSession(true);
         String sessionKey = "dropbox-auth-csrf-token";
         DbxSessionStore csrfTokenStore = new DbxStandardSessionStore(session, sessionKey);
